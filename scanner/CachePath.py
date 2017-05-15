@@ -24,8 +24,11 @@ def trim_base_custom(path, base):
     return path
 def trim_base(path):
     return trim_base_custom(path, trim_base.base)
-def cache_base(path):
-    path = trim_base(path).replace('/', '-').replace(' ', '_').replace('(', '').replace('&', '').replace(',', '').replace(')', '').replace('#', '').replace('[', '').replace(']', '').replace('"', '').replace("'", '').replace('_-_', '-').lower()
+def cache_base(path, withoutslash=True):
+    path = trim_base(path)
+    if withoutslash:
+        path = path.replace('/', '-')
+    path = path.replace(' ', '_').replace('(', '').replace('&', '').replace(',', '').replace(')', '').replace('#', '').replace('[', '').replace(']', '').replace('"', '').replace("'", '').replace('_-_', '-').lower()
     while path.find("--") != -1:
         path = path.replace("--", "-")
     while path.find("__") != -1:
@@ -35,11 +38,11 @@ def cache_base(path):
     return path
 def json_cache(path):
     return cache_base(path) + ".json"
-def image_cache(path, size, square=False):
+def image_cache(path, size, square=False, withoutslash=True):
     if square:
         suffix = str(size) + "s"
     else:
         suffix = str(size)
-    return cache_base(path) + "_" + suffix + ".jpg"
+    return cache_base(path, withoutslash) + "_" + suffix + ".jpg"
 def file_mtime(path):
     return datetime.fromtimestamp(int(os.path.getmtime(path)))

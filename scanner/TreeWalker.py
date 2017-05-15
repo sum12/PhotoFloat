@@ -5,6 +5,7 @@ from datetime import datetime
 from PhotoAlbum import Photo, Album, PhotoAlbumEncoder
 from CachePath import *
 import json
+from multiprocessing.pool import ThreadPool
 
 class TreeWalker:
     def __init__(self, album_path, cache_path):
@@ -13,9 +14,10 @@ class TreeWalker:
         set_cache_path_base(self.album_path)
         self.all_albums = list()
         self.all_photos = list()
+        self.pool = ThreadPool(10)
         self.walk(self.album_path)
         self.big_lists()
-        self.remove_stale()
+        #self.remove_stale()
         message("complete", "")
     def walk(self, path):
         next_level()
@@ -34,13 +36,15 @@ class TreeWalker:
                     message("full cache", os.path.basename(path))
                     cached = True
                     album = cached_album
+                    self.pool.map(lambda x: x._thumbnail_lns(self.cache_path), album.photos)
+                    #pool.wait_completion()
                     for photo in album.photos:
                         self.all_photos.append(photo)
                 else:
                     message("partial cache", os.path.basename(path))
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception as e:
                 message("corrupt cache", os.path.basename(path))
                 cached_album = None
         if not cached:
@@ -69,6 +73,7 @@ class TreeWalker:
                     cached_photo = cached_album.photo_from_path(entry)
                     if cached_photo and file_mtime(entry) <= cached_photo.attributes["dateTimeFile"]:
                         message("cache hit", os.path.basename(entry))
+                        cached_photo._thumbnail_lns(self.cache_path)
                         cache_hit = True
                         photo = cached_photo
                 if not cache_hit:

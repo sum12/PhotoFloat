@@ -36,7 +36,8 @@ def login():
     return ""
 
 def cache_base(path):
-    path = path.replace('/', '-').replace(' ', '_').replace('(', '').replace('&', '').replace(',', '').replace(')', '').replace('#', '').replace('[', '').replace(']', '').replace('"', '').replace("'", '').replace('_-_', '-').lower()
+    #path = path.replace('/', '-').replace(' ', '_').replace('(', '').replace('&', '').replace(',', '').replace(')', '').replace('#', '').replace('[', '').replace(']', '').replace('"', '').replace("'", '').replace('_-_', '-').lower()
+    path = path.replace(' ', '_').replace('(', '').replace('&', '').replace(',', '').replace(')', '').replace('#', '').replace('[', '').replace(']', '').replace('"', '').replace("'", '').replace('_-_', '-').lower()
     while path.find("--") != -1:
         path = path.replace("--", "-")
     while path.find("__") != -1:
@@ -80,7 +81,7 @@ def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
     internal_path = os.path.join(internal, relative_name)
     if not os.path.isfile(real_path):
-        abort(404)
+        abort(405)
     mimetype = None
     types = guess_type(real_path)
     if len(types) != 0:

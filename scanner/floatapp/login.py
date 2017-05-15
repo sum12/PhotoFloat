@@ -50,4 +50,4 @@ def query_is_admin_user(query):
     return username == app.config["ADMIN_USERNAME"] and password == app.config["ADMIN_PASSWORD"]
 
 def is_authenticated():
-    return query_is_admin_user(request.args) or query_is_photo_user(request.args) or current_user.is_authenticated()
+    return query_is_admin_user(request.args) or query_is_photo_user(request.args) or current_user.is_authenticated
