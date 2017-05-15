@@ -96,7 +96,7 @@ $(document).ready(function() {
 		if (populate) {
 			photos = [];
 			for (i = 0; i < currentAlbum.photos.length; ++i) {
-				link = $("<a href=\"#!/" + photoFloat.photoHash(currentAlbum, currentAlbum.photos[i]) + "\"></a>");
+				link = $("<a href=\"#!/" + photoFloat.photoHash(currentAlbum, currentAlbum.photos[i], true) + "\"></a>");
 				image = $("<img title=\"" + photoFloat.trimExtension(currentAlbum.photos[i].name) + "\" alt=\"" + photoFloat.trimExtension(currentAlbum.photos[i].name) + "\" src=\"" + photoFloat.photoPath(currentAlbum, currentAlbum.photos[i], 150, true) + "\" height=\"150\" width=\"150\" />");
 				image.get(0).photo = currentAlbum.photos[i];
 				link.append(image);
@@ -115,7 +115,7 @@ $(document).ready(function() {
 			
 			subalbums = [];
 			for (i = currentAlbum.albums.length - 1; i >= 0; --i) {
-				link = $("<a href=\"#!/" + photoFloat.albumHash(currentAlbum.albums[i]) + "\"></a>");
+				link = $("<a href=\"#!/" + photoFloat.albumHash(currentAlbum.albums[i], true) + "\"></a>");
 				image = $("<div title=\"" + currentAlbum.albums[i].date + "\" class=\"album-button\">" + currentAlbum.albums[i].path + "</div>");
 				link.append(image);
 				subalbums.push(link);
@@ -166,6 +166,7 @@ $(document).ready(function() {
 	}
 	function showPhoto() {
 		var width, height, photoSrc, previousPhoto, nextPhoto, nextLink, text;
+        console.log('should show photo')
 		width = currentPhoto.size[0];
 		height = currentPhoto.size[1];
 		if (width > height) {
@@ -191,12 +192,12 @@ $(document).ready(function() {
 		nextPhoto = currentAlbum.photos[
 			(currentPhotoIndex + 1 >= currentAlbum.photos.length) ? 0 : (currentPhotoIndex + 1)
 		];
-		$.preloadImages(photoFloat.photoPath(currentAlbum, nextPhoto, maxSize, false), photoFloat.photoPath(currentAlbum, previousPhoto, maxSize, false));
+		$.preloadImages(photoFloat.photoPath(currentAlbum, nextPhoto, maxSize, false), photoFloat.photoPath(currentAlbum, previousPhoto, maxSize, false ));
 		
-		nextLink = "#!/" + photoFloat.photoHash(currentAlbum, nextPhoto);
+		nextLink = "#!/" + photoFloat.photoHash(currentAlbum, nextPhoto, true);
 		$("#next-photo").attr("href", nextLink);
 		$("#next").attr("href", nextLink);
-		$("#back").attr("href", "#!/" + photoFloat.photoHash(currentAlbum, previousPhoto));
+		$("#back").attr("href", "#!/" + photoFloat.photoHash(currentAlbum, previousPhoto, true));
 		$("#original-link").attr("target", "_blank").attr("href", photoFloat.originalPhotoPath(currentAlbum, currentPhoto));
 
 		text = "<table>";

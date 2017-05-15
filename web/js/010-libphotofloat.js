@@ -14,7 +14,7 @@
 		if (Object.prototype.toString.call(subalbum).slice(8, -1) === "String")
 			cacheKey = subalbum;
 		else
-			cacheKey = PhotoFloat.cachePath(subalbum.parent.path + "/" + subalbum.path);
+			cacheKey = PhotoFloat.cachePath(subalbum.parent.path + "/" + subalbum.path, true);
 		if (this.albumCache.hasOwnProperty(cacheKey)) {
 			callback(this.albumCache[cacheKey]);
 			return;
@@ -61,6 +61,8 @@
 		var index, album, photo;
 		hash = PhotoFloat.cleanHash(hash);
 		index = hash.lastIndexOf("/");
+        console.log(hash)
+        console.log(index)
 		if (!hash.length) {
 			album = PhotoFloat.cachePath("root");
 			photo = null;
@@ -103,14 +105,16 @@
 	};
 	
 	/* static functions */
-	PhotoFloat.cachePath = function(path) {
+	PhotoFloat.cachePath = function(path, withoutslash) {
+        withoutslash = typeof withoutslash !== 'undefined' ? withoutslash : false;
 		if (path === "")
 			return "root";
 		if (path.charAt(0) === "/")
 			path = path.substring(1);
+        if (withoutslash === true)
+            path = path.replace(/\//g, "-")
 		path = path
 			.replace(/ /g, "_")
-			.replace(/\//g, "-")
 			.replace(/\(/g, "")
 			.replace(/\)/g, "")
 			.replace(/#/g, "")
@@ -128,21 +132,24 @@
 			path = path.replace(/__/g, "_");
 		return path;
 	};
-	PhotoFloat.photoHash = function(album, photo) {
-		return PhotoFloat.albumHash(album) + "/" + PhotoFloat.cachePath(photo.name);
+	PhotoFloat.photoHash = function(album, photo, withoutslash) {
+        withoutslash = typeof withoutslash !== 'undefined' ? withoutslash : false;
+		return PhotoFloat.albumHash(album, withoutslash) + "/" + PhotoFloat.cachePath(photo.name);
 	};
-	PhotoFloat.albumHash = function(album) {
+	PhotoFloat.albumHash = function(album, withoutslash) {
+        withoutslash = typeof withoutslash !== 'undefined' ? withoutslash : false;
 		if (typeof album.photos !== "undefined" && album.photos !== null)
-			return PhotoFloat.cachePath(album.path);
-		return PhotoFloat.cachePath(album.parent.path + "/" + album.path);
+			return PhotoFloat.cachePath(album.path, withoutslash);
+		return PhotoFloat.cachePath(album.parent.path + "/" + album.path, withoutslash);
 	};
-	PhotoFloat.photoPath = function(album, photo, size, square) {
+	PhotoFloat.photoPath = function(album, photo, size, square, withoutslash) {
 		var suffix, hash;
+        withoutslash = typeof withoutslash !== 'undefined' ? withoutslash : false;
 		if (square)
 			suffix = size.toString() + "s";
 		else
 			suffix = size.toString();
-		hash = PhotoFloat.cachePath(PhotoFloat.photoHash(album, photo) + "_" + suffix + ".jpg");
+		hash = PhotoFloat.cachePath(PhotoFloat.photoHash(album, photo, withoutslash) + "_" + suffix + ".jpg");
 		if (hash.indexOf("root-") === 0)
 			hash = hash.substring(5);
 		return "cache/" + hash;
