@@ -6,6 +6,7 @@ import os.path
 from PIL import Image
 from PIL.ExifTags import TAGS
 import gc
+import errno
 
 class Album(object):
     def __init__(self, path):
@@ -130,6 +131,7 @@ class Photo(object):
             return
         self._metadata(image)
         self._thumbnails(image, thumb_path, path)
+        self._thumbnail_lns(thumb_path)
     def _metadata(self, image):
         self._attributes["size"] = image.size
         self._orientation = 1
@@ -351,6 +353,43 @@ class Photo(object):
         photo = { "name": self.name, "date": self.date }
         photo.update(self.attributes)
         return photo
+
+    def _thumbnail_lns(self, cache_path):
+        for sizes in Photo.thumb_sizes:
+            size = sizes[0]
+            square = sizes[1]
+            thumb_path = os.path.join(cache_path, image_cache(self._path, size, square, False))
+            thumb_path_dump = os.path.join(cache_path, image_cache(self._path, size, square))
+            info_string = "%s -> %spx" % (os.path.basename(self._path), str(size))
+            if square:
+                info_string += ", square"
+            if os.path.exists(thumb_path) and os.path.lexists(thumb_path):
+                message("continuing", info_string)
+                continue
+            message("linking", info_string)
+            try:
+                tomake = os.path.dirname(thumb_path)
+                os.makedirs(tomake)
+            except OSError as exc:
+                if exc.errno == errno.EEXIST:
+                    pass
+                else:
+                    message('folder failure', os.path.basename(thumb_path))
+                    return
+            try:
+                os.rename(thumb_path_dump, thumb_path)
+            except KeyboardInterrupt:
+                try:
+                    os.unlink(thumb_path)
+                except:
+                    pass
+                raise
+            except:
+                message("link failure", os.path.basename(thumb_path))
+                try:
+                    os.unlink(thumb_path)
+                except:
+                    pass
 
 class PhotoAlbumEncoder(json.JSONEncoder):
     def default(self, obj):
