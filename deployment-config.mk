@@ -1,5 +1,5 @@
-WEB_SERVER := metheny.zx2c4.com
-WEB_SERVER_URL := https://photos.jasondonenfeld.com
+WEB_SERVER := 127.0.0.1:9100
+WEB_SERVER_URL := http://192.168.1.250:9100
 
 HTDOCS_PATH := /var/www/htdocs/photos.jasondonenfeld.com
 HTDOCS_USER := nginx
