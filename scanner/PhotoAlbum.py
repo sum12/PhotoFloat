@@ -367,7 +367,7 @@ class Photo(object):
                 message("continue", info_string)
                 continue
             else:
-            message("linking", info_string)
+                message("linking", info_string)
             try:
                 tomake = os.path.dirname(thumb_path)
                 os.makedirs(tomake)
