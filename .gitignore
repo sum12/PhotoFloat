@@ -2,3 +2,7 @@
 *.venv*
 *static*
 *.cfg
+
+
+web.photofloat/*
+*/node_modules/*
