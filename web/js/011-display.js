@@ -26,12 +26,39 @@ $(document).ready(function() {
 	var previousAlbum = null;
 	var previousPhoto = null;
 	var originalTitle = document.title;
+    var defaulttags = [ 'showall' ,'one', 'two', 'three', 'four'];
 	var photoFloat = new PhotoFloat();
 	var maxSize = 800;
 	
-	
 	/* Displays */
-	
+
+	function showTagHeader(){
+		if (currentPhoto !== null) {
+            $('#tagheader').hide()
+                return
+        }
+        var i;
+        $('#tagheader').empty();
+        for (i=0; i<defaulttags.length; i++){
+            link = $("<a class=tagname data-tagname="+defaulttags[i]+" >"+defaulttags[i]+"</a>");
+            $('#tagheader').append(link);
+            $('#tagheader').append(' &divideontimes; ');
+        };
+        $('#tagheader').show();
+        console.log($("#tagheader .tagname"))
+    }
+
+    $(document).on('click', "#tagheader .tagname",function(){
+        var tag = $(this).data('tagname')
+        console.log(tag)
+        if (tag==='showall'){
+            $('#thumbs img').show();
+        }
+        else {
+            $('#thumbs img').hide();
+            $('#thumbs img[imagetags-'+tag+']').show();
+        }
+    });
 	function setTitle() {
 		var title = "", documentTitle = "", last = "", components, i;
 		if (!currentAlbum.path.length)
@@ -89,7 +116,7 @@ $(document).ready(function() {
 		}
 	}
 	function showAlbum(populate) {
-		var i, link, image, photos, thumbsElement, subalbums, subalbumsElement;
+		var i, link, image, photos, tags, tagindex, thumbsElement, subalbums, subalbumsElement;
 		if (currentPhoto === null && previousPhoto === null)
 			$("html, body").stop().animate({ scrollTop: 0 }, "slow");
 		
@@ -100,6 +127,12 @@ $(document).ready(function() {
 				image = $("<img title=\"" + photoFloat.trimExtension(currentAlbum.photos[i].name) + "\" alt=\"" + photoFloat.trimExtension(currentAlbum.photos[i].name) + "\" src=\"" + photoFloat.photoPath(currentAlbum, currentAlbum.photos[i], 150, true) + "\" height=\"150\" width=\"150\" />");
 				image.get(0).photo = currentAlbum.photos[i];
 				link.append(image);
+                tags = currentAlbum.photos[i].tags || 'one,two,three,four'
+                tags = tags.split(',')
+                for (tagindex=0;tagindex < tags.length; tagindex++){
+                    image.attr('imagetags-'+tags[i%4], '1')
+                    break;
+                }
 				photos.push(link);
 				(function(theLink, theImage, theAlbum) {
 					theImage.error(function() {
@@ -258,6 +291,7 @@ $(document).ready(function() {
 		currentPhoto = photo;
 		currentPhotoIndex = photoIndex;
 		setTitle();
+		showTagHeader();
 		showAlbum(previousAlbum !== currentAlbum);
 		if (photo !== null)
 			showPhoto();

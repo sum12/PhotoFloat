@@ -10,7 +10,7 @@ CSS_MIN_FILES := $(sort $(patsubst %.css, %.min.css, $(filter-out %.min.css, $(w
 JS_COMPILER := java -jar bin/closure-compiler.jar --warning_level QUIET
 CSS_COMPILER := java -jar bin/yui-compressor.jar --type css
 
-DEBUG ?= 0
+DEBUG ?= 1
 
 .PHONY: all deploy clean
 
