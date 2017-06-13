@@ -38,15 +38,11 @@ def cache_base(path, withoutslash=True):
     return path
 def json_cache(path):
     return cache_base(path) + ".json"
-==== BASE ====
 def image_cache(path, size, square=False):
-==== BASE ====
     if square:
         suffix = str(size) + "s"
     else:
         suffix = str(size)
-==== BASE ====
     return cache_base(path) + "_" + suffix + ".jpg"
-==== BASE ====
 def file_mtime(path):
     return datetime.fromtimestamp(int(os.path.getmtime(path)))

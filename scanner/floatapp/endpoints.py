@@ -81,9 +81,7 @@ def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
     internal_path = os.path.join(internal, relative_name)
     if not os.path.isfile(real_path):
-==== BASE ====
         abort(404)
-==== BASE ====
     mimetype = None
     types = guess_type(real_path)
     if len(types) != 0:
