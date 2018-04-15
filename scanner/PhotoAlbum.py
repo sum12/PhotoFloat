@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 import os
 import os.path
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from PIL.ExifTags import TAGS
 import gc
 import errno
@@ -263,6 +263,12 @@ class Photo(object):
                 bottom = image.size[1] - ((image.size[1] - image.size[0]) / 2)
             image = image.crop((left, top, right, bottom))
             gc.collect()
+        dt = self.date
+        if dt and self.is_valid:
+            dt = dt.strftime("%c")
+            draw = ImageDraw.Draw(image)
+            font = ImageFont.truetype("arial.ttf", 80, encoding="unic")
+            draw.text((10, 10), dt, fill='#a00000', font=font)
         image.thumbnail((size, size), Image.ANTIALIAS)
         try:
             tomake = os.path.dirname(thumb_path)
