@@ -7,6 +7,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import gc
 import errno
+import traceback
 
 class Album(object):
     def __init__(self, path):
@@ -272,6 +273,7 @@ class Photo(object):
                 pass
             raise
         except:
+            traceback.print_exc()
             message("save failure", os.path.basename(thumb_path))
             try:
                 os.unlink(thumb_path)

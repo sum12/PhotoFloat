@@ -5,6 +5,7 @@ from datetime import datetime
 from PhotoAlbum import Photo, Album, PhotoAlbumEncoder
 from CachePath import *
 import json
+import traceback
 from multiprocessing.pool import ThreadPool
 
 class TreeWalker:
@@ -46,6 +47,7 @@ class TreeWalker:
                 raise
             except Exception as e:
                 message("corrupt cache", os.path.basename(path))
+                traceback.print_exc()
                 cached_album = None
         if not cached:
             album = Album(path)
