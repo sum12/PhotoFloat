@@ -265,6 +265,15 @@ class Photo(object):
             gc.collect()
         image.thumbnail((size, size), Image.ANTIALIAS)
         try:
+            tomake = os.path.dirname(thumb_path)
+            os.makedirs(tomake)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST:
+                pass
+            else:
+                message('folder failure', os.path.basename(thumb_path))
+                return
+        try:
             image.save(thumb_path, "JPEG", quality=88)
         except KeyboardInterrupt:
             try:
