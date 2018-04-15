@@ -6,7 +6,7 @@ from PhotoAlbum import Photo, Album, PhotoAlbumEncoder
 from CachePath import *
 import json
 import traceback
-from multiprocessing.pool import ThreadPool
+#from multiprocessing.pool import ThreadPool
 
 class TreeWalker:
     def __init__(self, album_path, cache_path):
@@ -15,7 +15,7 @@ class TreeWalker:
         set_cache_path_base(self.album_path)
         self.all_albums = list()
         self.all_photos = list()
-        self.pool = ThreadPool(10)
+        #self.pool = ThreadPool(10)
         self.walk(self.album_path)
         self.big_lists()
         #self.remove_stale()
@@ -37,8 +37,8 @@ class TreeWalker:
                     message("full cache", os.path.basename(path))
                     cached = True
                     album = cached_album
-                    self.pool.map(lambda x: x._thumbnail_lns(self.cache_path), album.photos)
-                    #pool.wait_completion()
+                    #self.pool.map(lambda x: x._thumbnail_lns(self.cache_path), album.photos)
+                    #self.pool.wait_completion()
                     for photo in album.photos:
                         self.all_photos.append(photo)
                 else:
