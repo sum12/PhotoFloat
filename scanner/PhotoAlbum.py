@@ -229,7 +229,7 @@ class Photo(object):
     _metadata.subject_distance_range_list = ["Unknown", "Macro", "Close view", "Distant view"]
         
     def _thumbnail(self, image, thumb_path, original_path, size, square=False):
-        thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square))
+        thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square, False))
         info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
         if square:
             info_string += ", square"
@@ -363,8 +363,16 @@ class Photo(object):
             info_string = "%s -> %spx" % (os.path.basename(self._path), str(size))
             if square:
                 info_string += ", square"
-            if os.path.exists(thumb_path):
+            if thumb_path_dump == thumb_path or (os.path.exists(thumb_path) and not os.path.exists(thumb_path_dump)):
                 message("continue", info_string)
+                continue
+            elif os.path.exists(thumb_path) and os.path.exists(thumb_path_dump):
+                message("duplicate", info_string)
+                try:
+                    os.unlink(thumb_path_dump)
+                except KeyboardInterrupt:
+                    message('unlink failure', os.path.basename(thumb_path))
+                    raise
                 continue
             else:
                 message("linking", info_string)
