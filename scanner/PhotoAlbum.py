@@ -72,16 +72,16 @@ class Album(object):
         json.dump(self, fp, cls=PhotoAlbumEncoder)
         fp.close()
     @staticmethod
-    def from_cache(path):
+    def from_cache(path, cache_base=None):
         fp = open(path, "r")
         dictionary = json.load(fp)
         fp.close()
-        return Album.from_dict(dictionary)
+        return Album.from_dict(dictionary, cache_base=cache_base)
     @staticmethod
-    def from_dict(dictionary, cripple=True):
+    def from_dict(dictionary, cripple=True, cache_base=None):
         album = Album(dictionary["path"])
         for photo in dictionary["photos"]:
-            album.add_photo(Photo.from_dict(photo, untrim_base(album.path)))
+            album.add_photo(Photo.from_dict(photo, untrim_base(album.path), cache_base))
         if not cripple:
             for subalbum in dictionary["albums"]:
                 album.add_album(Album.from_dict(subalbum), cripple)
@@ -338,7 +338,7 @@ class Photo(object):
     def attributes(self):
         return self._attributes
     @staticmethod
-    def from_dict(dictionary, basepath):
+    def from_dict(dictionary, basepath, cache_base=None):
         del dictionary["date"]
         path = os.path.join(basepath, dictionary["name"])
         del dictionary["name"]
@@ -350,7 +350,7 @@ class Photo(object):
                     raise
                 except:
                     pass
-        return Photo(path, None, dictionary)
+        return Photo(path, cache_base, dictionary)
     def to_dict(self):
         photo = { "name": self.name, "date": self.date }
         photo.update(self.attributes)

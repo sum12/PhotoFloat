@@ -32,7 +32,7 @@ class TreeWalker:
         cached_album = None
         if os.path.exists(cache):
             try:
-                cached_album = Album.from_cache(cache)
+                cached_album = Album.from_cache(cache, self.cache_path)
                 if file_mtime(path) <= file_mtime(cache):
                     message("full cache", os.path.basename(path))
                     cached = True
@@ -45,7 +45,7 @@ class TreeWalker:
                     message("partial cache", os.path.basename(path))
             except KeyboardInterrupt:
                 raise
-            except Exception as e:
+            except :
                 message("corrupt cache", os.path.basename(path))
                 traceback.print_exc()
                 cached_album = None
