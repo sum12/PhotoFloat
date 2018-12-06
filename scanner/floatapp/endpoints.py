@@ -17,8 +17,8 @@ configure_uploads(app, (albumuploadset,))
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
-@app.route("/scan")
-@admin_required
+@app.route("/scan", methods=['POST'])
+#@admin_required
 def scan_photos():
     global cwd
     response = send_process([ "stdbuf", "-oL", os.path.abspath(os.path.join(cwd, "../main.py")),
