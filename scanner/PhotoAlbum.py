@@ -8,6 +8,7 @@ from PIL.ExifTags import TAGS
 import gc
 import errno
 import traceback
+import subprocess
 
 class Album(object):
     def __init__(self, path):
@@ -133,6 +134,7 @@ class Photo(object):
         self._metadata(image)
         self._thumbnails(image, thumb_path, path)
         self._thumbnail_lns(thumb_path)
+        self._thumbnail_exif(thumb_path, path)
     def _metadata(self, image):
         self._attributes["size"] = image.size
         self._orientation = 1
@@ -410,6 +412,22 @@ class Photo(object):
                     os.unlink(thumb_path)
                 except:
                     pass
+
+    def _thumbnail_exif(self, cache_path, original_path):
+        for sizes in Photo.thumb_sizes:
+            size = sizes[0]
+            square = sizes[1]
+            thumb_path = os.path.join(cache_path, image_cache(self._path, size, square, False))
+            info_string = "%s -> %spx" % (os.path.basename(self._path), str(size))
+            if square:
+                info_string += ", square"
+            message("exifcopy", info_string)
+            try:
+                subprocess.call(['exiftool', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
+            except Exception as exc:
+                print(exc)
+                message('exif copy failure',)
+
 
 class PhotoAlbumEncoder(json.JSONEncoder):
     def default(self, obj):
