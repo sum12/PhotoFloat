@@ -1,4 +1,5 @@
 *.swp
 *.venv*
+*venv*
 *static*
 *.cfg
