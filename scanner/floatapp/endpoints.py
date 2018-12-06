@@ -3,6 +3,8 @@ from floatapp.login import admin_required, login_required, is_authenticated, que
 from floatapp.jsonp import jsonp
 from floatapp.process import send_process
 from TreeWalker import TreeWalker
+from PhotoAlbum import Photo
+from CachePath import set_cache_path_base
 from flask import Response, abort, json, request, jsonify
 from flask_login import login_user, current_user
 from random import shuffle
@@ -15,6 +17,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 albumuploadset = UploadSet('albums', IMAGES, default_dest=lambda app:app.config['ALBUM_PATH'])
 configure_uploads(app, (albumuploadset,))
 
+set_cache_path_base(app.config['ALBUM_PATH'])
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 @app.route("/scan", methods=['POST'])
@@ -138,6 +141,8 @@ def upload():
     filename = albumuploadset.save(
                 request.files['pic'],
                 folder=request.form.get('album_path'))
+    filepath = os.path.abspath(os.path.sep.join([app.config["ALBUM_PATH"], filename]))
+    Photo(filepath, os.path.abspath(app.config["CACHE_PATH"]))
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True
     return response
