@@ -1,7 +1,7 @@
 from floatapp import app
 from floatapp.login import admin_required, login_required, is_authenticated, query_is_photo_user, query_is_admin_user, photo_user, admin_user
 from floatapp.jsonp import jsonp
-from process import send_process
+from floatapp.process import send_process
 from TreeWalker import TreeWalker
 from flask import Response, abort, json, request, jsonify
 from flask_login import login_user, current_user
@@ -67,15 +67,18 @@ def check_permissions(path):
             if path.startswith(auth_path):
                 abort(403)
 
+
 @app.route("/albums/<path:path>")
 def albums(path):
     check_permissions(path)
     return accel_redirect(app.config["ALBUM_ACCEL"], app.config["ALBUM_PATH"], path)
 
+
 @app.route("/cache/<path:path>")
 def cache(path):
     check_permissions(path)
     return accel_redirect(app.config["CACHE_ACCEL"], app.config["CACHE_PATH"], path)
+
 
 def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
