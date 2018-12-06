@@ -9,6 +9,12 @@ from random import shuffle
 import os
 from mimetypes import guess_type
 
+from flask import send_from_directory
+
+from flask_uploads import UploadSet, configure_uploads, IMAGES
+albumuploadset = UploadSet('albums', IMAGES, default_dest=lambda app:app.config['ALBUM_PATH'])
+configure_uploads(app, (albumuploadset,))
+
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 @app.route("/scan")
@@ -118,5 +124,20 @@ def photos():
     else:
         photos.reverse()
     response = jsonify(photos=photos[0:count])
+    response.cache_control.no_cache = True
+    return response
+
+
+@app.route("/upload", methods=['POST'])
+@jsonp
+def upload():
+    if request.form.get('album_path', '') == '':
+        return abort(400, 'album_path is missing')
+    if 'pic' not in request.files:
+        return abort(400, 'pic is missing')
+    filename = albumuploadset.save(
+                request.files['pic'],
+                folder=request.form.get('album_path'))
+    response = jsonify(msg=filename)
     response.cache_control.no_cache = True
     return response
