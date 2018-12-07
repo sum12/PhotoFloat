@@ -11,10 +11,9 @@ from random import shuffle
 import os
 from mimetypes import guess_type
 
-from flask import send_from_directory
-
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 albumuploadset = UploadSet('albums', IMAGES, default_dest=lambda app:app.config['ALBUM_PATH'])
+albumuploadset.resolve_conflict = lambda folder, fname: fname
 configure_uploads(app, (albumuploadset,))
 
 set_cache_path_base(app.config['ALBUM_PATH'])
