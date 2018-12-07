@@ -134,7 +134,7 @@ class Photo(object):
         self._metadata(image)
         self._thumbnails(image, thumb_path, path)
         self._thumbnail_lns(thumb_path)
-        self._thumbnail_exif(thumb_path, path)
+        
     def _metadata(self, image):
         self._attributes["size"] = image.size
         self._orientation = 1
@@ -230,15 +230,22 @@ class Photo(object):
     _metadata.sensing_method_list = ["Not defined", "One-chip color area sensor", "Two-chip color area sensor", "Three-chip color area sensor", "Color sequential area sensor", "Trilinear sensor", "Color sequential linear sensor"]
     _metadata.scene_capture_type_list = ["Standard", "Landscape", "Portrait", "Night scene"]
     _metadata.subject_distance_range_list = ["Unknown", "Macro", "Close view", "Distant view"]
-        
-    def _thumbnail(self, image, thumb_path, original_path, size, square=False):
+
+    def check_exists(self, thumb_path, original_path, size, square=False):
         thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square, False))
         info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
         if square:
             info_string += ", square"
         message("thumbing", info_string)
         if os.path.exists(thumb_path) and file_mtime(thumb_path) >= self._attributes["dateTimeFile"]:
-            return
+            return True
+        return False
+        
+    def _thumbnail(self, image, thumb_path, original_path, size, square=False):
+        thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square, False))
+        info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
+        if square:
+            info_string += ", square"
         gc.collect()
         try:
             image = image.copy()
@@ -289,9 +296,22 @@ class Photo(object):
             try:
                 os.unlink(thumb_path)
             except:
-                pass
-        
+                return
+        message("exifcopy", info_string)
+        try:
+            subprocess.call(['exiftool', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
+        except:
+            traceback.print_exc()
+            message('exif failure', os.path.basename(thumb_path))
+
     def _thumbnails(self, image, thumb_path, original_path):
+        create = False
+        for size in Photo.thumb_sizes:
+            if not self.check_exists(thumb_path, original_path, size[0], size[1]):
+                create = True
+                break
+        if not create:
+            return
         mirror = image
         if self._orientation == 2:
             # Vertical Mirror
@@ -413,20 +433,6 @@ class Photo(object):
                 except:
                     pass
 
-    def _thumbnail_exif(self, cache_path, original_path):
-        for sizes in Photo.thumb_sizes:
-            size = sizes[0]
-            square = sizes[1]
-            thumb_path = os.path.join(cache_path, image_cache(self._path, size, square, False))
-            info_string = "%s -> %spx" % (os.path.basename(self._path), str(size))
-            if square:
-                info_string += ", square"
-            message("exifcopy", info_string)
-            try:
-                subprocess.call(['exiftool', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
-            except Exception as exc:
-                print(exc)
-                message('exif copy failure',)
 
 
 class PhotoAlbumEncoder(json.JSONEncoder):
