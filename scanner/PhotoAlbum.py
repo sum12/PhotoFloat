@@ -108,7 +108,7 @@ class Album(object):
     
 class Photo(object):
     thumb_sizes = [ (75, True), (150, True), (640, False), (800, False), (1024, False) ]
-    def __init__(self, path, thumb_path=None, attributes=None, album_base=None):
+    def __init__(self, path, thumb_path=None, attributes=None, album_base=None, compress=False):
         if album_base:
             set_cache_path_base(album_base)
         self._path = trim_base(path)
@@ -135,8 +135,9 @@ class Photo(object):
             self.is_valid = False
             return
         self._metadata(image)
-        self._thumbnails(image, thumb_path, path)
-        self._thumbnail_lns(thumb_path)
+        if compress:
+            self._thumbnails(image, thumb_path, path)
+            self._thumbnail_lns(thumb_path)
         
     def _metadata(self, image):
         self._attributes["size"] = image.size

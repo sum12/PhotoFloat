@@ -20,7 +20,7 @@ class TreeWalker:
         self.big_lists()
         #self.remove_stale()
         message("complete", "")
-    def walk(self, path):
+    def walk(self, path, compress=False):
         next_level()
         if not os.access(path, os.R_OK | os.X_OK):
             message("access denied", os.path.basename(path))
@@ -80,7 +80,7 @@ class TreeWalker:
                         photo = cached_photo
                 if not cache_hit:
                     message("metainfo", os.path.basename(entry))
-                    photo = Photo(entry, self.cache_path)
+                    photo = Photo(entry, self.cache_path, compress=compress)
                 if photo.is_valid:
                     self.all_photos.append(photo)
                     album.add_photo(photo)
