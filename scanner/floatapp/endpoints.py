@@ -141,9 +141,6 @@ def photos():
 @app.route("/upload", methods=['POST'])
 @jsonp
 def upload():
-    global worker
-    if worker is not None and worker.is_alive():
-        abort(make_response(jsonify(code='msg', msg='scan is running, please wait'), 409))
     if request.form.get('album_path', '') == '':
         abort(make_response(jsonify(code='msg', msg='album path is missing'), 400))
     if 'pic' not in request.files:
