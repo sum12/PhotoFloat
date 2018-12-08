@@ -30,6 +30,7 @@ def scan_photos():
             walker = Process(target=TreeWalker, args=(album_path, cache_path))
             walker.start()
             response = jsonify(code='started')
+            thumber_works.clear()
         elif walker.is_alive():
             abort(make_response(jsonify(code='walkerrunning', pid=walker.pid), 409))
     else:
