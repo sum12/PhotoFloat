@@ -150,10 +150,15 @@ def upload():
                 folder=request.form.get('album_path'))
     filepath = os.path.abspath(os.path.sep.join([app.config["ALBUM_PATH"], filename]))
     cache_path = os.path.abspath(app.config["CACHE_PATH"])
+    args = (filepath, cache_path)
+    kwds = dict(
+            album_base=app.config['ALBUM_PATH'],
+            compress=True
+            )
     thumber_works.append((
                 filename,
                 request.form.get('album_path'),
-                thumber_pool.apply_async(Photo, args=(filepath, cache_path), kwds={'album_base': app.config['ALBUM_PATH']})
+                thumber_pool.apply_async(Photo, args=args, kwds=kwds)
                 ))
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True
