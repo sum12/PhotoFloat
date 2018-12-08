@@ -52,7 +52,6 @@ def send_process(args, pid_file):
         pid = f.read()
         f.close()
         if os.path.exists("/proc/%s/status" % pid):
-            return Response("Scanner is already running.\n", mimetype="text/plain")
-    process = subprocess.Popen(args, close_fds=True, stdout=subprocess.PIPE, preexec_fn=setup_proc)
-    response = ProcessWrapper(process, tear_down_proc)
+            abort(make_response(jsonify(code='walkerrunning', pid=walker.pid), 409))
+    process = subprocess.Popen(args, close_fds=True, stdout=subprocess.stdout, preexec_fn=setup_proc)
     return Response(response, direct_passthrough=True, mimetype="text/plain")
