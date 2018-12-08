@@ -108,14 +108,17 @@ class Album(object):
     
 class Photo(object):
     thumb_sizes = [ (75, True), (150, True), (640, False), (800, False), (1024, False) ]
-    def __init__(self, path, thumb_path=None, attributes=None):
+    def __init__(self, path, thumb_path=None, attributes=None, album_base=None):
+        if album_base:
+            set_cache_path_base(album_base)
         self._path = trim_base(path)
         self.is_valid = True
         try:
             mtime = file_mtime(path)
         except KeyboardInterrupt:
             raise
-        except:
+        except Exception,e:
+            traceback.print_exc()
             self.is_valid = False
             return
         if attributes is not None and attributes["dateTimeFile"] >= mtime:

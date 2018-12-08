@@ -16,7 +16,6 @@ albumuploadset = UploadSet('albums', IMAGES, default_dest=lambda app:app.config[
 albumuploadset.resolve_conflict = lambda folder, fname: fname
 configure_uploads(app, (albumuploadset,))
 
-set_cache_path_base(app.config['ALBUM_PATH'])
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 @app.route("/scan", methods=['POST'])
