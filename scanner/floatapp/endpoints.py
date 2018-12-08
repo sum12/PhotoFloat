@@ -161,3 +161,17 @@ def upload():
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True
     return response
+
+@app.route("/upload_status")
+@jsonp
+def upload_status():
+    res = []
+    for fn, abn, resob in thumber_works:
+        res.append(dict(
+            filename=fn, 
+            album_path=abn,
+            ready=resob.ready(),
+            successful=resob.ready() and resob.successful()))
+    response = jsonify(working=res)
+    response.cache_control.no_cache = True
+    return response
