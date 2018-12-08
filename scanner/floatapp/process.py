@@ -1,7 +1,13 @@
-from flask import Response
+from flask import Response, jsonify, make_response
 import subprocess
 import os
-import sys
+
+from multiprocessing import Pool, Process
+
+thumber_works = list()
+thumber_pool = Pool()
+walker = None
+
 
 class ProcessWrapper(object):
     def __init__(self, process, done):

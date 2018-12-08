@@ -1,11 +1,11 @@
 from floatapp import app
 from floatapp.login import admin_required, login_required, is_authenticated, query_is_photo_user, query_is_admin_user, photo_user, admin_user
 from floatapp.jsonp import jsonp
-from floatapp.process import send_process
-from TreeWalker import TreeWalker
+from floatapp.process import thumber_pool, thumber_works, walker
+from multiprocessing import Process
 from PhotoAlbum import Photo
-from CachePath import set_cache_path_base
-from flask import Response, abort, json, request, jsonify
+from TreeWalker import TreeWalker
+from flask import Response, abort, json, request, jsonify, make_response
 from flask_login import login_user, current_user
 from random import shuffle
 import os
@@ -20,12 +20,24 @@ cwd = os.path.dirname(os.path.abspath(__file__))
 
 @app.route("/scan", methods=['POST'])
 #@admin_required
+@jsonp
 def scan_photos():
-    global cwd
-    response = send_process([ "stdbuf", "-oL", os.path.abspath(os.path.join(cwd, "../main.py")),
-                os.path.abspath(app.config["ALBUM_PATH"]), os.path.abspath(app.config["CACHE_PATH"]) ],
-                os.path.join(cwd, "scanner.pid"))
-    response.headers.add("X-Accel-Buffering", "no")
+    global walker
+    if all(map(lambda jbspec: jbspec[2].ready(), thumber_works)):
+        if walker is None or walker.is_alive() is False:
+            album_path = os.path.abspath(app.config["ALBUM_PATH"])
+            cache_path = os.path.abspath(app.config["CACHE_PATH"])
+            walker = Process(target=TreeWalker, args=(album_path, cache_path))
+            walker.start()
+            response = jsonify(code='started')
+        elif walker.is_alive():
+            abort(make_response(jsonify(code='walkerrunning', pid=walker.pid), 409))
+    else:
+        def todict(jbspec):
+           return dict(filename=jbspec[0], album_path=jbspec[1])
+        pending = filter(lambda jbspec: not jbspec[2].ready(), thumber_works)
+        pending = map(todict, pending)
+        abort(make_response(jsonify(code='pending', pending=pending), 409))
     response.cache_control.no_cache = True
     return response
 
@@ -140,7 +152,12 @@ def upload():
                 request.files['pic'],
                 folder=request.form.get('album_path'))
     filepath = os.path.abspath(os.path.sep.join([app.config["ALBUM_PATH"], filename]))
-    Photo(filepath, os.path.abspath(app.config["CACHE_PATH"]))
+    cache_path = os.path.abspath(app.config["CACHE_PATH"])
+    thumber_works.append((
+                filename,
+                request.form.get('album_path'),
+                thumber_pool.apply_async(Photo, args=(filepath, cache_path), kwds={'album_base': app.config['ALBUM_PATH']})
+                ))
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True
     return response
