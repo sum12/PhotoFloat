@@ -303,7 +303,7 @@ class Photo(object):
                 return
         message("exifcopy", info_string)
         try:
-            subprocess.call(['exiftool', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
+            subprocess.call(['exiftool', '-q', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
         except:
             traceback.print_exc()
             message('exif failure', os.path.basename(thumb_path))
