@@ -137,7 +137,7 @@ class Photo(object):
         self._metadata(image)
         if compress:
             self._thumbnails(image, thumb_path, path)
-            self._thumbnail_lns(thumb_path)
+#            self._thumbnail_lns(thumb_path)
         
     def _metadata(self, image):
         self._attributes["size"] = image.size
@@ -401,7 +401,6 @@ class Photo(object):
             if square:
                 info_string += ", square"
             if thumb_path_dump == thumb_path or (os.path.exists(thumb_path) and not os.path.exists(thumb_path_dump)):
-                message("continue", info_string)
                 continue
             elif os.path.exists(thumb_path) and os.path.exists(thumb_path_dump):
                 message("duplicate", info_string)
