@@ -18,12 +18,14 @@ configure_uploads(app, (albumuploadset,))
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
-@app.route("/scan", methods=['POST'])
+@app.route("/scan", methods=['POST', 'GET'])
 #@admin_required
 @jsonp
 def scan_photos():
     global walker
-    if all(map(lambda jbspec: jbspec[2].ready(), thumber_works)):
+    if request.method == 'GET':
+        response = jsonify(code='running', running=walker.is_alive())
+    else:
         if walker is None or walker.is_alive() is False:
             album_path = os.path.abspath(app.config["ALBUM_PATH"])
             cache_path = os.path.abspath(app.config["CACHE_PATH"])
@@ -33,12 +35,6 @@ def scan_photos():
             thumber_works.clear()
         elif walker.is_alive():
             abort(make_response(jsonify(code='walkerrunning', pid=walker.pid), 409))
-    else:
-        def todict(jbspec):
-           return dict(filename=jbspec[0], album_path=jbspec[1])
-        pending = filter(lambda jbspec: not jbspec[2].ready(), thumber_works)
-        pending = map(todict, pending)
-        abort(make_response(jsonify(code='pending', pending=pending), 409))
     response.cache_control.no_cache = True
     return response
 
