@@ -242,7 +242,6 @@ class Photo(object):
         info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
         if square:
             info_string += ", square"
-        message("thumbing", info_string)
         if os.path.exists(thumb_path) and file_mtime(thumb_path) >= self._attributes["dateTimeFile"]:
             return True
         return False
@@ -252,6 +251,7 @@ class Photo(object):
         info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
         if square:
             info_string += ", square"
+        message("thumbing", info_string)
         gc.collect()
         try:
             image = image.copy()
