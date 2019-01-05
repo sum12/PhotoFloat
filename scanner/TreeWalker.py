@@ -9,9 +9,10 @@ import traceback
 #from multiprocessing.pool import ThreadPool
 
 class TreeWalker:
-    def __init__(self, album_path, cache_path):
+    def __init__(self, album_path, cache_path, compress=False):
         self.album_path = os.path.abspath(album_path).decode(sys.getfilesystemencoding())
         self.cache_path = os.path.abspath(cache_path).decode(sys.getfilesystemencoding())
+        self.compress = compress
         set_cache_path_base(self.album_path)
         self.all_albums = list()
         self.all_photos = list()
@@ -20,7 +21,7 @@ class TreeWalker:
         self.big_lists()
         #self.remove_stale()
         message("complete", "")
-    def walk(self, path, compress=False):
+    def walk(self, path):
         next_level()
         if not os.access(path, os.R_OK | os.X_OK):
             message("access denied", os.path.basename(path))
@@ -80,7 +81,7 @@ class TreeWalker:
                         photo = cached_photo
                 if not cache_hit:
                     message("metainfo", os.path.basename(entry))
-                    photo = Photo(entry, self.cache_path, compress=compress)
+                    photo = Photo(entry, self.cache_path, compress=self.compress)
                 if photo.is_valid:
                     self.all_photos.append(photo)
                     album.add_photo(photo)
