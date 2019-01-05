@@ -142,8 +142,10 @@ class Photo(object):
     def _metadata(self, image):
         self._attributes["size"] = image.size
         self._orientation = 1
+        self._rawexif = None
         try:
             info = image._getexif()
+            self._rawexif = image.info['exif']
         except KeyboardInterrupt:
             raise
         except:
@@ -287,7 +289,10 @@ class Photo(object):
                 message('folder failure', os.path.basename(thumb_path))
                 return
         try:
-            image.save(thumb_path, "JPEG", quality=88)
+            if not self._rawexif:
+                image.save(thumb_path, "JPEG", quality=88)
+            else:
+                image.save(thumb_path, "JPEG", quality=88, exif=self._rawexif)
         except KeyboardInterrupt:
             try:
                 os.unlink(thumb_path)
@@ -301,12 +306,6 @@ class Photo(object):
                 os.unlink(thumb_path)
             except:
                 return
-        message("exifcopy", info_string)
-        try:
-            subprocess.call(['exiftool', '-q', '-overwrite_original' ,'-tagsFromFile', original_path, thumb_path])
-        except:
-            traceback.print_exc()
-            message('exif failure', os.path.basename(thumb_path))
 
     def _thumbnails(self, image, thumb_path, original_path):
         create = False
