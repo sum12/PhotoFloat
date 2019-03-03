@@ -1,11 +1,10 @@
 from floatapp import app
-from floatapp.login import admin_required, login_required, is_authenticated, query_is_photo_user, query_is_admin_user, photo_user, admin_user
+from floatapp.login import is_authenticated, query_is_photo_user, query_is_admin_user, photo_user, admin_user
 from floatapp.jsonp import jsonp
-from floatapp.process import thumber_pool, thumber_works, walker
-from multiprocessing import Process
+from floatapp.process import thumber_pool, thumber_works
+from floatapp.walker import  wait_and_scan
 from PhotoAlbum import Photo
-from TreeWalker import TreeWalker
-from flask import Response, abort, json, request, jsonify, make_response
+from flask import Response, abort, json, request, jsonify, make_response, send_file
 from flask_login import login_user, current_user
 from random import shuffle
 import os
@@ -18,23 +17,37 @@ configure_uploads(app, (albumuploadset,))
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
-@app.route("/scan", methods=['POST', 'GET'])
+def find_scanner():
+    return filter(lambda jb: jb.type == 'scanner', thumber_works)
+
+@app.route("/scan", methods=['GET'])
 #@admin_required
 @jsonp
-def scan_photos():
-    global walker
-    if request.method == 'GET':
-        response = jsonify(code='running', running=walker.is_alive())
-    else:
-        if walker is None or walker.is_alive() is False:
-            album_path = os.path.abspath(app.config["ALBUM_PATH"])
-            cache_path = os.path.abspath(app.config["CACHE_PATH"])
-            walker = Process(target=TreeWalker, args=(album_path, cache_path))
-            walker.start()
-            response = jsonify(code='started')
-            del thumber_works[:]
-        elif walker.is_alive():
-            abort(make_response(jsonify(code='walkerrunning', pid=walker.pid), 409))
+def check_scanner():
+    try:
+        walker = find_scanner()[0]
+        running = walker.done
+    except:
+        walker = None
+        running = False
+    response = jsonify(code='running', running=running)
+    response.cache_control.no_cache = True
+    return response
+
+
+@app.route("/scan", methods=['POST'])
+#@admin_required
+@jsonp
+def start_scanner():
+    try:
+        _ = find_scanner()[0]
+        abort(make_response(jsonify(code='running', running=True), 409))
+    except:
+        pass
+    args = (app.config["ALBUM_PATH"], app.config["CACHE_PATH"])
+    jb = thumber_pool.apply_async(wait_and_scan, args=args)
+    thumber_works.append(dict(type='scanner', _jb=jb))
+    response = jsonify(code='started')
     response.cache_control.no_cache = True
     return response
 
@@ -98,6 +111,7 @@ def cache(path):
 
 def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
+    return send_file(real_path)
     internal_path = os.path.join(internal, relative_name)
     if not os.path.isfile(real_path):
         abort(405)
@@ -155,25 +169,25 @@ def upload():
             album_base=app.config['ALBUM_PATH'],
             compress=True
             )
-    thumber_works.append((
-                filename,
-                request.form.get('album_path'),
-                thumber_pool.apply_async(Photo, args=args, kwds=kwds)
+    thumber_works.append(dict(
+                type='thumber',
+                filename=filename,
+                album_path=request.form.get('album_path'),
+                _jb=thumber_pool.apply_async(Photo, args=args, kwds=kwds)
                 ))
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True
     return response
 
+
+def thumber_status():
+    for jb in filter(lambda x: x['type'] == 'thumber', thumber_works):
+        yield jb.update(dict(done=jb._jb.ready() and jb._jb.successful()))
+
+
 @app.route("/upload_status")
 @jsonp
 def upload_status():
-    res = []
-    for fn, abn, resob in thumber_works:
-        res.append(dict(
-            filename=fn, 
-            album_path=abn,
-            ready=resob.ready(),
-            successful=resob.ready() and resob.successful()))
-    response = jsonify(working=res)
+    response = jsonify(working=[i['done'] for i in thumber_status()])
     response.cache_control.no_cache = True
     return response
