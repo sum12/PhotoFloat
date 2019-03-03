@@ -7,4 +7,6 @@ Werkzeug>=0.12.1
 argparse>=1.2.1
 gunicorn>=19.7.1
 #oldref>=0.1.2
-flask-uploads -e git://github.com/maxcountryman/flask-uploads.git@d074dcf
+flask-uploads
+click
+itsdangerous
