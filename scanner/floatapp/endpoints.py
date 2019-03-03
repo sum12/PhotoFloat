@@ -12,7 +12,7 @@ import os
 from mimetypes import guess_type
 
 from flask_uploads import UploadSet, configure_uploads, IMAGES
-albumuploadset = UploadSet('albums', IMAGES, default_dest=lambda app:app.config['ALBUM_PATH'])
+albumuploadset = UploadSet('albums', IMAGES + tuple('mp4'.split()), default_dest=lambda app:app.config['ALBUM_PATH'])
 albumuploadset.resolve_conflict = lambda folder, fname: fname
 configure_uploads(app, (albumuploadset,))
 
