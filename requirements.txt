@@ -7,6 +7,5 @@ Werkzeug>=0.12.1
 argparse>=1.2.1
 gunicorn>=19.7.1
 #oldref>=0.1.2
-flask-uploads
 click
 itsdangerous

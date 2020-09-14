@@ -5,6 +5,7 @@ import os
 import os.path
 from PIL import Image
 from PIL.ExifTags import TAGS
+from PIL.TiffImagePlugin import IFDRational
 import gc
 import errno
 import traceback
@@ -51,10 +52,10 @@ class Album(object):
         self._albums_sorted = False
     def _sort(self):
         if not self._photos_sorted:
-            self._photos.sort()
+            self._photos.sort(key=lambda item: (item.date, item.name))
             self._photos_sorted = True
         if not self._albums_sorted:
-            self._albums.sort()
+            self._albums.sort(key=lambda item: item.date)
             self._albums_sorted = True
     @property
     def empty(self):
@@ -117,7 +118,7 @@ class Photo(object):
             mtime = file_mtime(path)
         except KeyboardInterrupt:
             raise
-        except Exception,e:
+        except Exception as e:
             traceback.print_exc()
             self.is_valid = False
             return
@@ -154,13 +155,13 @@ class Photo(object):
             return
         
         exif = {}
-        for tag, value in info.items():
+        for tag, value in list(info.items()):
             decoded = TAGS.get(tag, tag)
-            if (isinstance(value, tuple) or isinstance(value, list)) and (isinstance(decoded, str) or isinstance(decoded, unicode)) and decoded.startswith("DateTime") and len(value) >= 1:
+            if (isinstance(value, tuple) or isinstance(value, list)) and (isinstance(decoded, str) or isinstance(decoded, str)) and decoded.startswith("DateTime") and len(value) >= 1:
                 value = value[0]
-            if isinstance(value, str) or isinstance(value, unicode):
+            if isinstance(value, str) or isinstance(value, str):
                 value = value.strip().partition("\x00")[0]
-                if (isinstance(decoded, str) or isinstance(decoded, unicode)) and decoded.startswith("DateTime"):
+                if (isinstance(decoded, str) or isinstance(decoded, str)) and decoded.startswith("DateTime"):
                     try:
                         value = datetime.strptime(value, '%Y:%m:%d %H:%M:%S')
                     except KeyboardInterrupt:
@@ -443,5 +444,7 @@ class PhotoAlbumEncoder(json.JSONEncoder):
             return obj.strftime("%a %b %d %H:%M:%S %Y")
         if isinstance(obj, Album) or isinstance(obj, Photo):
             return obj.to_dict()
+        if isinstance(obj, IFDRational):
+            return [obj.numerator, obj.denominator]
         return json.JSONEncoder.default(self, obj)
         

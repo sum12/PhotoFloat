@@ -4,7 +4,7 @@ from floatapp.jsonp import jsonp
 from floatapp.process import thumber_pool, thumber_works
 from floatapp.walker import  wait_and_scan
 from PhotoAlbum import Photo
-from flask import Response, abort, json, request, jsonify, make_response, send_file
+from flask import Response, abort, json, request, jsonify, make_response, send_file, send_from_directory
 from flask_login import login_user, current_user
 from random import shuffle
 import os
@@ -18,7 +18,7 @@ configure_uploads(app, (albumuploadset,))
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 def find_scanner():
-    return filter(lambda jb: jb.type == 'scanner', thumber_works)
+    return [jb for jb in thumber_works if jb.type == 'scanner']
 
 @app.route("/scan", methods=['GET'])
 #@admin_required
@@ -108,6 +108,11 @@ def cache(path):
     check_permissions(path)
     return accel_redirect(app.config["CACHE_ACCEL"], app.config["CACHE_PATH"], path)
 
+@app.route('/<path:path>')
+def send_js(path):
+    print(f'{path}')
+    print(f'{os.getcwd()}')
+    return send_from_directory('/home/sumit/wksc/personal/PhotoFloat/web', path)
 
 def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
@@ -181,7 +186,7 @@ def upload():
 
 
 def thumber_status():
-    for jb in filter(lambda x: x['type'] == 'thumber', thumber_works):
+    for jb in [x for x in thumber_works if x['type'] == 'thumber']:
         yield jb.update(dict(done=jb._jb.ready() and jb._jb.successful()))
 
 

@@ -10,17 +10,23 @@ import traceback
 
 class TreeWalker:
     def __init__(self, album_path, cache_path, compress=False):
-        self.album_path = os.path.abspath(album_path).decode(sys.getfilesystemencoding())
-        self.cache_path = os.path.abspath(cache_path).decode(sys.getfilesystemencoding())
-        self.compress = compress
-        set_cache_path_base(self.album_path)
-        self.all_albums = list()
-        self.all_photos = list()
-        #self.pool = ThreadPool(10)
-        self.walk(self.album_path)
-        self.big_lists()
-        #self.remove_stale()
-        message("complete", "")
+        try:
+            self.album_path = os.path.abspath(album_path)
+            self.cache_path = os.path.abspath(cache_path)
+            self.compress = compress
+            set_cache_path_base(self.album_path)
+            self.all_albums = list()
+            self.all_photos = list()
+            #self.pool = ThreadPool(10)
+            message("will start waling", "")
+            self.walk(self.album_path)
+            self.big_lists()
+            #self.remove_stale()
+            message("complete", "")
+        except Exception as e:
+            import traceback
+            print(f" error {str(e)}")
+            traceback.print_exc()
     def walk(self, path):
         next_level()
         if not os.access(path, os.R_OK | os.X_OK):
@@ -56,7 +62,7 @@ class TreeWalker:
             if entry[0] == '.':
                 continue
             try:
-                entry = entry.decode(sys.getfilesystemencoding())
+                entry = entry
             except KeyboardInterrupt:
                 raise
             except:
@@ -98,7 +104,7 @@ class TreeWalker:
         return album
     def big_lists(self):
         photo_list = []
-        self.all_photos.sort()
+        self.all_photos.sort(key=lambda item: (item.date, item.name))
         for photo in self.all_photos:
             photo_list.append(photo.path)
         message("caching", "all photos path list")
