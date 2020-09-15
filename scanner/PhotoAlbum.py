@@ -247,8 +247,8 @@ class Photo(object):
             return True
         return False
         
-    def _thumbnail(self, image, thumb_path, original_path, size, square=False):
-        thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square, False))
+    def _thumbnail(self, image, thumb_path, original_path, size, square=False, suffix=None):
+        thumb_path = os.path.join(thumb_path, image_cache(self._path, size, square, False, suffix))
         info_string = "%s -> %spx" % (os.path.basename(original_path), str(size))
         if square:
             info_string += ", square"
@@ -316,6 +316,7 @@ class Photo(object):
                 break
         if not create:
             return
+        self._thumbnail(image, thumb_path, original_path, 1024, False, suffix='norot')
         mirror = image
         if self._orientation == 2:
             # Vertical Mirror
@@ -339,7 +340,7 @@ class Photo(object):
             # Rotation 90
             mirror = image.transpose(Image.ROTATE_90)
         for size in Photo.thumb_sizes:
-            self._thumbnail(mirror, thumb_path, original_path, size[0], size[1])
+            self._thumbnail(mirror, thumb_path, original_path, size[0], size[1], suffix=None)
     @property
     def name(self):
         return os.path.basename(self._path)
