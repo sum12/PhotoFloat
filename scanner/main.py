@@ -8,7 +8,6 @@ import imp
 
 def main():
     imp.reload(sys)
-    sys.setdefaultencoding("UTF-8")
 
     if len(sys.argv) != 3:
         print("usage: %s ALBUM_PATH CACHE_PATH" % sys.argv[0])
