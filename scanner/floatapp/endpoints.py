@@ -2,7 +2,7 @@ from floatapp import app
 from floatapp.login import is_authenticated, query_is_photo_user, query_is_admin_user, photo_user, admin_user
 from floatapp.jsonp import jsonp
 from floatapp.process import thumber_pool, thumber_works
-from floatapp.walker import  wait_and_scan
+from floatapp.walker import  wait_and_scan, wait_and_compress
 from PhotoAlbum import Photo
 from flask import Response, abort, json, request, jsonify, make_response, send_file, send_from_directory
 from flask_login import login_user, current_user
@@ -178,7 +178,7 @@ def upload():
                 type='thumber',
                 filename=filename,
                 album_path=request.form.get('album_path'),
-                _jb=thumber_pool.apply_async(Photo, args=args, kwds=kwds)
+                _jb=thumber_pool.apply_async(wait_and_compress, args=args, kwds=kwds)
                 ))
     response = jsonify(msg=filename)
     response.cache_control.no_cache = True

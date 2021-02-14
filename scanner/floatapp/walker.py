@@ -12,3 +12,10 @@ def wait_and_scan(albumpath, cachepath):
     cpath = os.path.abspath(cachepath)
     TreeWalker(apath, cpath)
     del thumber_works[:]
+
+def wait_and_compress(*args, **kwds):
+    def check(jb):
+        return jb.type == 'scanner'
+    while len(list(filter(check, thumber_works))) > 0:
+        sleep(5)
+    Photo(*args, **kwds)
