@@ -18,7 +18,7 @@ configure_uploads(app, (albumuploadset,))
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 def find_scanner():
-    return [jb for jb in thumber_works if jb.type == 'scanner']
+    return [jb['_jb'] for jb in thumber_works if jb['type'] == 'scanner']
 
 @app.route("/scan", methods=['GET'])
 #@admin_required
@@ -27,10 +27,12 @@ def check_scanner():
     try:
         walker = find_scanner()[0]
         running = walker.done
-    except:
+    except Exception as e:
         walker = None
         running = False
-    response = jsonify(code='running', running=running)
+        response = jsonify(code='exception', exception=str(e))
+    else:
+        response = jsonify(code='running', running=running)
     response.cache_control.no_cache = True
     return response
 
@@ -187,7 +189,7 @@ def upload():
 
 def thumber_status():
     for jb in [x for x in thumber_works if x['type'] == 'thumber']:
-        yield jb.update(dict(done=jb._jb.ready() and jb._jb.successful()))
+        yield jb.update(dict(done=jb['_jb'].ready() and jb['_jb'].successful()))
 
 
 @app.route("/upload_status")
