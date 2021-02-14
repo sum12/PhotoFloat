@@ -179,12 +179,22 @@ $(document).ready(function() {
 		$(window).unbind("resize", scaleImage);
 		photoSrc = photoFloat.photoPath(currentAlbum, currentPhoto, maxSize, false);
 		$("#photo")
-			.attr("width", width).attr("height", height).attr("ratio", currentPhoto.size[0] / currentPhoto.size[1])
+			.attr("width", width).attr("height", height)//.attr("ratio", currentPhoto.size[0] / currentPhoto.size[1])
 			.attr("src", photoSrc)
 			.attr("alt", currentPhoto.name)
 			.attr("title", currentPhoto.date)
-			.load(scaleImage);
+			.data("rotate", 0)
+			.data("rationext", currentPhoto.size[1] / currentPhoto.size[0])
+            .css({ 
+                '-webkit-transform': 'rotate(0deg)',
+                '-moz-transform': 'rotate(0deg)',
+                '-o-transform': 'rotate(0deg)',
+                '-ms-transform': 'rotate(0deg)',
+                'transform': 'rotate(0deg)'
+                })
+            .load(scaleImage);
 		$("head").append("<link rel=\"image_src\" href=\"" + photoSrc + "\" />");
+
 		
 		previousPhoto = currentAlbum.photos[
 			(currentPhotoIndex - 1 < 0) ? (currentAlbum.photos.length - 1) : (currentPhotoIndex - 1)
@@ -333,6 +343,23 @@ $(document).ready(function() {
 				$("#metadata-link").text($("#metadata-link").text().replace("hide", "show"));
 			});
 	});
+    $("#rotate90").click(function(){
+        var deg = 0;
+        deg = $("#photo").data("rotate");
+        console.log(deg)
+        deg+=90;
+        deg=deg%360;
+        console.log(deg)
+        $("#photo").data("rotate", deg);
+        var rotate = 'rotate(' + deg + 'deg)';
+        $("#photo").css({ 
+            '-webkit-transform': rotate,
+            '-moz-transform': rotate,
+            '-o-transform': rotate,
+            '-ms-transform': rotate,
+            'transform': rotate 
+            });
+    })
 	$("#auth-form").submit(function() {
 		var password = $("#password");
 		password.css("background-color", "rgb(128, 128, 200)");
