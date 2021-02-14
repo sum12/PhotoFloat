@@ -17,6 +17,6 @@ def wait_and_scan(albumpath, cachepath):
 def wait_and_compress(*args, **kwds):
     def check(jb):
         return jb.type == 'scanner'
-    while len(list(filter(check, thumber_works))) > 0:
+    while len(list(filter(check, thumber_works))) < 0:
         sleep(5)
     Photo(*args, **kwds)
