@@ -1,11 +1,8 @@
 Flask>=0.12.1
 Flask-Login>=0.4.0
 Jinja2>=2.9.6
-MarkupSafe>=1.0
 Pillow>=4.1.1
 Werkzeug>=0.12.1
-argparse>=1.2.1
 gunicorn>=19.7.1
 #oldref>=0.1.2
-click
 itsdangerous
