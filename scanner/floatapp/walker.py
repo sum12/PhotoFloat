@@ -1,5 +1,6 @@
 from TreeWalker import TreeWalker
 from floatapp.process import thumber_works
+from PhotoAlbum import Photo
 
 from time import sleep
 import os
