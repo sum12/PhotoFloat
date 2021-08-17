@@ -26,7 +26,7 @@ def find_scanner():
 def check_scanner():
     try:
         walker = find_scanner()[0]
-        running = walker.done
+        running = walker.ready()
     except Exception as e:
         walker = None
         running = False
@@ -189,7 +189,8 @@ def upload():
 
 def thumber_status():
     for jb in [x for x in thumber_works if x['type'] == 'thumber']:
-        yield jb.update(dict(done=jb['_jb'].ready() and jb['_jb'].successful()))
+        jb.update(dict(done="%s, %s" % (jb['_jb'].ready(), jb['_jb'].successful())))
+        yield jb
 
 
 @app.route("/upload_status")
