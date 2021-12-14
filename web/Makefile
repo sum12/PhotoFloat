@@ -26,9 +26,15 @@ else
 	@cat $< > $@
 endif
 
+ifeq ($(DEBUG),0)
 %.min.css: %.css
 	@echo "    CSS    " $@
 	@$(CSS_COMPILER) -o $@ $<
+else
+%.min.css: %.css
+	@echo "    CSS    " $@
+	@cat $< > $@
+endif
 
 $(JS_MIN): $(JS_MIN_FILES)
 	@echo "    CAT    " $@
