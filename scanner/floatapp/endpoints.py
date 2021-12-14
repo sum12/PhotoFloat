@@ -24,13 +24,14 @@ def find_scanner():
 #@admin_required
 @jsonp
 def check_scanner():
+    clean_done_jobs()
     try:
         walker = find_scanner()[0]
         running = walker.ready()
     except Exception as e:
         walker = None
         running = False
-        response = jsonify(code='exception', exception=str(e))
+        response = jsonify(code='notfound', running=False)
     else:
         response = jsonify(code='running', running=running)
     response.cache_control.no_cache = True
@@ -41,6 +42,7 @@ def check_scanner():
 #@admin_required
 @jsonp
 def start_scanner():
+    clean_done_jobs()
     try:
         _ = find_scanner()[0]
         abort(make_response(jsonify(code='running', running=True), 409))
@@ -176,6 +178,7 @@ def upload():
             album_base=app.config['ALBUM_PATH'],
             compress=True
             )
+    clean_done_jobs()
     thumber_works.append(dict(
                 type='thumber',
                 filename=filename,
@@ -199,3 +202,9 @@ def upload_status():
     response = jsonify(working=[i['done'] for i in thumber_status()])
     response.cache_control.no_cache = True
     return response
+
+
+def clean_done_jobs():
+    for jb in list(thumber_works):
+        if jb['_jb'].ready():
+            thumber_works.remove(jb)
