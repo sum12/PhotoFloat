@@ -120,7 +120,8 @@ def send_js(path):
 
 def accel_redirect(internal, real, relative_name):
     real_path = os.path.join(real, relative_name)
-    return send_file(real_path)
+    if app.config["DEBUG"]:
+        return send_file(real_path)
     internal_path = os.path.join(internal, relative_name)
     if not os.path.isfile(real_path):
         abort(405)
